@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор жизни программиста</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .energy-bar-container {
+            width: 150px;
+            height: 14px;
+            background-color: #333;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .energy-bar {
+            height: 100%;
+            background-color: #4caf50;
+            width: 50%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .scene-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button {
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: 1px solid #444;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        button:hover {
+            background-color: #383838;
+            border-color: #4caf50;
+        }
+        .restart-btn {
+            background-color: #4caf50;
+            color: #121212;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .restart-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <span><strong>Dev Simulator</strong></span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="energy-text">Энергия: 50%</span>
+            <div class="energy-bar-container">
+                <div class="energy-bar" id="energy-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene-text" id="scene-text">Загрузка сюжета...</div>
+    <div class="choices" id="choices"></div>
+</div>
+
+<script>
+    let story = {};
+    let energy = 50;
+
+    async function initGame() {
+        try {
+            const response = await fetch('story.json');
+            story = await response.json();
+            energy = 50;
+            updateEnergy(0);
+            renderScene('start');
+        } catch (e) {
+            document.getElementById('scene-text').innerText = 
+                'Ошибка загрузки story.json. Если открываете файл локально, запустите через Live Server или GitHub Pages.';
+        }
+    }
+
+    function updateEnergy(change) {
+        energy += change;
+        if (energy > 100) energy = 100;
+        if (energy < 0) energy = 0;
+
+        const bar = document.getElementById('energy-bar');
+        const text = document.getElementById('energy-text');
+        
+        bar.style.width = energy + '%';
+        text.innerText = `Энергия: ${energy}%`;
+
+        if (energy > 50) bar.style.backgroundColor = '#4caf50';
+        else if (energy > 20) bar.style.backgroundColor = '#ff9800';
+        else bar.style.backgroundColor = '#f44336';
+    }
+
+    function renderScene(sceneId) {
+        const textEl = document.getElementById('scene-text');
+        const choicesEl = document.getElementById('choices');
+        choicesEl.innerHTML = '';
+
+        if (energy <= 0) {
+            textEl.innerText = 'Ты уснул прямо лицом на клавиатуре. Сон победил.';
+            addRestartButton(choicesEl);
+            return;
+        }
+
+        const scene = story[sceneId];
+        if (!scene) {
+            textEl.innerText = 'Сцена не найдена! Пора сделать новый коммит и дописать её в story.json.';
+            addRestartButton(choicesEl);
+            return;
+        }
+
+        textEl.innerText = scene.text;
+
+        if (!scene.choices || scene.choices.length === 0) {
+            addRestartButton(choicesEl);
+            return;
+        }
+
+        scene.choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.innerText = choice.text;
+            btn.onclick = () => {
+                updateEnergy(choice.energy_change || 0);
+                renderScene(choice.next_scene);
+            };
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    function addRestartButton(container) {
+        const btn = document.createElement('button');
+        btn.className = 'restart-btn';
+        btn.innerText = 'Начать день заново';
+        btn.onclick = initGame;
+        container.appendChild(btn);
+    }
+
+    initGame();
+</script>
+
+</body>
+</html>
