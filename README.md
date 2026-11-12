@@ -2,9 +2,7 @@
 
 Текстовый квест о буднях студента-айтишника: управляйте энергией, переживите пары и не усните за клавиатурой.
 
-### 🚀 [▶️ ОТКРЫТЬ ИГРУ В БРАУЗЕРЕ](https://github.io)
-
-*(Проект: [uarikwork-boop.github.io/My_Pet_Project](https://github.io))*
+### 🚀 [▶️ ОТКРЫТЬ ИГРУ В БРАУЗЕРЕ](https://uarikwork-boop.github.io/My_Pet_Project/)
 
 ---
 
