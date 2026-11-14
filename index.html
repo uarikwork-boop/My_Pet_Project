@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Симулятор жизни программиста</title>
+
     <style>
         body {
             background-color: #121212;
@@ -17,6 +19,7 @@
             padding: 20px;
             box-sizing: border-box;
         }
+
         .game-container {
             background-color: #1e1e1e;
             border: 1px solid #333;
@@ -26,6 +29,7 @@
             width: 100%;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -34,29 +38,76 @@
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
-        .energy-bar-container {
-            width: 150px;
-            height: 14px;
-            background-color: #333;
-            border-radius: 7px;
+
+        /* Панель характеристик */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background-color: #292929;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .stat-bar-container {
+            height: 8px;
+            background-color: #444;
+            border-radius: 5px;
             overflow: hidden;
         }
-        .energy-bar {
+
+        .stat-bar {
             height: 100%;
-            background-color: #4caf50;
             width: 50%;
-            transition: width 0.3s ease, background-color 0.3s ease;
+            border-radius: 5px;
+            transition: width 0.3s ease;
         }
+
+        .energy-bar {
+            background-color: #4caf50;
+        }
+
+        .money-bar {
+            background-color: #d9ad39;
+        }
+
+        .study-bar {
+            background-color: #4285d4;
+        }
+
+        .reputation-bar {
+            background-color: #9b73cf;
+        }
+
         .scene-text {
             font-size: 18px;
             line-height: 1.6;
             margin-bottom: 25px;
         }
+
         .choices {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
         button {
             background-color: #2d2d2d;
             color: #ffffff;
@@ -68,10 +119,12 @@
             text-align: left;
             transition: background-color 0.2s, border-color 0.2s;
         }
+
         button:hover {
             background-color: #383838;
             border-color: #4caf50;
         }
+
         .restart-btn {
             background-color: #4caf50;
             color: #121212;
@@ -79,75 +132,191 @@
             text-align: center;
             margin-top: 15px;
         }
+
         .restart-btn:hover {
             background-color: #45a049;
         }
+
+        @media (max-width: 450px) {
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .game-container {
+                padding: 18px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
 <div class="game-container">
+
     <div class="header">
         <span><strong>Dev Simulator</strong></span>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="energy-text">Энергия: 50%</span>
-            <div class="energy-bar-container">
-                <div class="energy-bar" id="energy-bar"></div>
-            </div>
-        </div>
     </div>
 
-    <div class="scene-text" id="scene-text">Загрузка сюжета...</div>
+    <!-- Панель характеристик -->
+    <div class="stats-panel">
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>⚡ Энергия</span>
+                <span class="stat-value" id="energy-text">50%</span>
+            </div>
+            <div class="stat-bar-container">
+                <div class="stat-bar energy-bar" id="energy-bar"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>💰 Деньги</span>
+                <span class="stat-value" id="money-text">2500 ₽</span>
+            </div>
+            <div class="stat-bar-container">
+                <div class="stat-bar money-bar" id="money-bar"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>📚 Успеваемость</span>
+                <span class="stat-value" id="study-text">50/100</span>
+            </div>
+            <div class="stat-bar-container">
+                <div class="stat-bar study-bar" id="study-bar"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>⭐ Репутация</span>
+                <span class="stat-value" id="reputation-text">50/100</span>
+            </div>
+            <div class="stat-bar-container">
+                <div class="stat-bar reputation-bar" id="reputation-bar"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="scene-text" id="scene-text">
+        Загрузка сюжета...
+    </div>
+
     <div class="choices" id="choices"></div>
+
 </div>
 
 <script>
     let story = {};
-    let energy = 50;
 
+    // Начальные характеристики
+    let energy = 50;
+    let money = 2500;
+    let study = 50;
+    let reputation = 50;
+
+    // Загрузка игры
     async function initGame() {
         try {
             const response = await fetch('story.json');
+
+            if (!response.ok) {
+                throw new Error('Не удалось загрузить story.json');
+            }
+
             story = await response.json();
+
+            // Сброс характеристик
             energy = 50;
-            updateEnergy(0);
+            money = 2500;
+            study = 50;
+            reputation = 50;
+
+            updateStats();
             renderScene('start');
+
         } catch (e) {
-            document.getElementById('scene-text').innerText = 
+            document.getElementById('scene-text').innerText =
                 'Ошибка загрузки story.json. Если открываете файл локально, запустите через Live Server или GitHub Pages.';
         }
     }
 
+    // Изменение энергии
     function updateEnergy(change) {
         energy += change;
+
         if (energy > 100) energy = 100;
         if (energy < 0) energy = 0;
 
-        const bar = document.getElementById('energy-bar');
-        const text = document.getElementById('energy-text');
-        
-        bar.style.width = energy + '%';
-        text.innerText = `Энергия: ${energy}%`;
-
-        if (energy > 50) bar.style.backgroundColor = '#4caf50';
-        else if (energy > 20) bar.style.backgroundColor = '#ff9800';
-        else bar.style.backgroundColor = '#f44336';
+        updateStats();
     }
 
+    // Обновление всех характеристик
+    function updateStats() {
+
+        // Энергия
+        document.getElementById('energy-text').innerText =
+            `Энергия: ${energy}%`;
+
+        const energyBar = document.getElementById('energy-bar');
+
+        energyBar.style.width = energy + '%';
+
+        if (energy > 50) {
+            energyBar.style.backgroundColor = '#4caf50';
+        } else if (energy > 20) {
+            energyBar.style.backgroundColor = '#ff9800';
+        } else {
+            energyBar.style.backgroundColor = '#f44336';
+        }
+
+        // Деньги
+        document.getElementById('money-text').innerText =
+            money.toLocaleString('ru-RU') + ' ₽';
+
+        document.getElementById('money-bar').style.width =
+            Math.min(money / 5000 * 100, 100) + '%';
+
+        // Успеваемость
+        document.getElementById('study-text').innerText =
+            study + '/100';
+
+        document.getElementById('study-bar').style.width =
+            study + '%';
+
+        // Репутация
+        document.getElementById('reputation-text').innerText =
+            reputation + '/100';
+
+        document.getElementById('reputation-bar').style.width =
+            reputation + '%';
+    }
+
+    // Отображение игровой сцены
     function renderScene(sceneId) {
         const textEl = document.getElementById('scene-text');
         const choicesEl = document.getElementById('choices');
+
         choicesEl.innerHTML = '';
 
         if (energy <= 0) {
-            textEl.innerText = 'Ты уснул прямо лицом на клавиатуре. Сон победил.';
+            textEl.innerText =
+                'Ты уснул прямо лицом на клавиатуре. Сон победил.';
+
             addRestartButton(choicesEl);
             return;
         }
 
         const scene = story[sceneId];
+
         if (!scene) {
-            textEl.innerText = 'Сцена не найдена! Пора сделать новый коммит и дописать её в story.json.';
+            textEl.innerText =
+                'Сцена не найдена! Пора сделать новый коммит и дописать её в story.json.';
+
             addRestartButton(choicesEl);
             return;
         }
@@ -161,24 +330,32 @@
 
         scene.choices.forEach(choice => {
             const btn = document.createElement('button');
+
             btn.innerText = choice.text;
+
             btn.onclick = () => {
                 updateEnergy(choice.energy_change || 0);
                 renderScene(choice.next_scene);
             };
+
             choicesEl.appendChild(btn);
         });
     }
 
+    // Кнопка перезапуска
     function addRestartButton(container) {
         const btn = document.createElement('button');
+
         btn.className = 'restart-btn';
         btn.innerText = 'Начать день заново';
         btn.onclick = initGame;
+
         container.appendChild(btn);
     }
 
+    // Запуск игры
     initGame();
+
 </script>
 
 </body>
