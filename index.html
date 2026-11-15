@@ -296,6 +296,26 @@
             reputation + '%';
     }
 
+    function applyChoice(choice) {
+    // Изменяем характеристики
+    energy += choice.energy_change || 0;
+    money += choice.money_change || 0;
+    study += choice.study_change || 0;
+    reputation += choice.reputation_change || 0;
+
+    // Ограничиваем значения
+    energy = Math.max(0, Math.min(100, energy));
+    money = Math.max(0, money);
+    study = Math.max(0, Math.min(100, study));
+    reputation = Math.max(0, Math.min(100, reputation));
+
+    // Обновляем панель
+    updateStats();
+
+    // Переходим к следующей сцене
+    renderScene(choice.next_scene);
+}
+
     // Отображение игровой сцены
     function renderScene(sceneId) {
         const textEl = document.getElementById('scene-text');
@@ -334,8 +354,7 @@
             btn.innerText = choice.text;
 
             btn.onclick = () => {
-                updateEnergy(choice.energy_change || 0);
-                renderScene(choice.next_scene);
+                applyChoice(choice);
             };
 
             choicesEl.appendChild(btn);
