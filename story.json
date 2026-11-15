@@ -6,11 +6,17 @@
       {
         "text": "Встать, выпить двойной эспрессо и пойти на пару",
         "energy_change": 15,
+        "money_change": -150,
+        "study_change": 0,
+        "reputation_change": 0,
         "next_scene": "lecture"
       },
       {
         "text": "Перевести будильник еще на 5 минут",
         "energy_change": -20,
+        "money_change": 0,
+        "study_change": -5,
+        "reputation_change": -5,
         "next_scene": "overslept"
       }
     ]
@@ -22,11 +28,17 @@
       {
         "text": "Уверенно ответить (спасибо вчерашнему гуглу)",
         "energy_change": -10,
+        "money_change": 0,
+        "study_change": 10,
+        "reputation_change": 5,
         "next_scene": "deadline"
       },
       {
         "text": "Сделать вид, что у тебя резко завис ноутбук",
         "energy_change": -15,
+        "money_change": 0,
+        "study_change": -5,
+        "reputation_change": -5,
         "next_scene": "deadline"
       }
     ]
@@ -38,6 +50,9 @@
       {
         "text": "Написать преподу, что помогал бабушке переустанавливать Windows",
         "energy_change": -10,
+        "money_change": 0,
+        "study_change": -3,
+        "reputation_change": -2,
         "next_scene": "deadline"
       }
     ]
@@ -49,11 +64,17 @@
       {
         "text": "Закомментировать падающую функцию и сделать вид, что так и задумано",
         "energy_change": -15,
+        "money_change": 0,
+        "study_change": -5,
+        "reputation_change": -3,
         "next_scene": "win_day"
       },
       {
         "text": "Выпить банку энергетика и переписать всё с нуля за 10 минут",
         "energy_change": -35,
+        "money_change": -150,
+        "study_change": 10,
+        "reputation_change": 5,
         "next_scene": "win_day"
       }
     ]
