@@ -315,6 +315,29 @@
     // Переходим к следующей сцене
     renderScene(choice.next_scene);
 }
+    function getChoiceEffects(choice) {
+    const effects = [];
+
+    if (choice.energy_change) {
+        effects.push(`⚡ ${choice.energy_change > 0 ? '+' : ''}${choice.energy_change}`);
+    }
+
+    if (choice.money_change) {
+        effects.push(`💰 ${choice.money_change > 0 ? '+' : ''}${choice.money_change} ₽`);
+    }
+
+    if (choice.study_change) {
+        effects.push(`📚 ${choice.study_change > 0 ? '+' : ''}${choice.study_change}`);
+    }
+
+    if (choice.reputation_change) {
+        effects.push(`⭐ ${choice.reputation_change > 0 ? '+' : ''}${choice.reputation_change}`);
+    }
+
+    return effects.length > 0
+        ? ` (${effects.join(' · ')})`
+        : '';
+}
 
     // Отображение игровой сцены
     function renderScene(sceneId) {
@@ -351,7 +374,7 @@
         scene.choices.forEach(choice => {
             const btn = document.createElement('button');
 
-            btn.innerText = choice.text;
+            btn.innerText = choice.text + getChoiceEffects(choice);
 
             btn.onclick = () => {
                 applyChoice(choice);
